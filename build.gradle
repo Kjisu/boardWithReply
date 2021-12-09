@@ -27,7 +27,17 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation ('org.springframework.boot:spring-boot-starter-test')
+			{
+				exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+			}
+
+	// https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
+	//MariaDB jdbc 드라이버 설치
+	implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.7.0'
+
+	// JAVA8 버전에 등장한 LocalDate, LocalDateTime을 편하게 사용하기 위해서
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-java8time:3.0.4.RELEASE'
 }
 
 test {

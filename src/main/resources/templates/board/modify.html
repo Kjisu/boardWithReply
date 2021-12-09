@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{/layout/basic :: setContent(~{this:: content})}">
+<head>
+    <meta charset="UTF-8">
+    <title>목록페이지</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+
+  <h1 class="mt-4">게시글 수정 페이지</h1>
+
+  <form>
+
+      <input type="hidden" name="page" th:value="${pageRequestDTO.page}">
+      <input type="hidden" name="type" th:value="${pageRequestDTO.type}">
+      <input type="hidden" name="keyword" th:value="${pageRequestDTO.keyword}">
+
+    <div class="form-group">
+      <label>Bno</label>
+      <input type="text" name="bno" class="form-control" th:value="${dto.bno}" readonly>
+    </div>
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" name="title" class="form-control" th:value="${dto.title}" >
+    </div>
+    <div class="form-group">
+      <label>Content</label>
+      <textarea name="content" rows="5" class="form-control" >[[${dto.content}]]</textarea>
+    </div>
+    <div class="form-group">
+      <label>Writer Email</label>
+      <input type="text" name="writerEmail" class="form-control" th:value="${dto.writerEmail}" readonly>
+    </div>
+    <div class="form-group">
+      <label>RegDate</label>
+      <input type="text" th:value="${#temporals.format(dto.regDate,'yyyy/MM/dd')}" class="form-control" readonly>
+    </div>
+    <div class="form-group">
+      <label>ModDate</label>
+      <input type="text" th:value="${#temporals.format(dto.modDate,'yyyy/MM/dd')}" class="form-control" readonly>
+    </div>
+
+    <!--수정,목록,삭제 버튼 시작-->
+    <button type="button" class="btn btn-primary modifyBtn">수정하기</button>
+    <button type="button" class="btn btn-info listBtn">목록으로</button>
+    <button type="button" class="btn btn-danger removeBtn">삭제하기</button>
+    <!--수정,목록,삭제 버튼 끝-->
+  </form>
+
+  <!--JS-->
+  <script th:inline="javascript">
+
+    var actionForm = $("form");
+
+    //수정버튼
+    $(".modifyBtn").click(function(){
+
+        if(!confirm("수정하시겠습니까?")){return;}
+
+        actionForm
+            .attr("action","/board/modify")
+            .attr("method","post")
+            .submit();
+    });
+
+    //삭제버튼
+    $(".removeBtn").click(function(){
+
+        if(!confirm("삭제하시겠습니까?")){return;}
+
+        actionForm
+            .attr("action","/board/remove")
+            .attr("method","post")
+            .submit();
+    });
+
+    //목록버튼
+    $(".listBtn").click(function(){
+
+        //페이지 정보 저장하고 -> 전체 form 삭제 -> 페이지 정보 다시 붙이기
+        var page = $("input[name='page']");
+        var type = $("input[name='type']");
+        var keyword = $("input[name='keyword']");
+
+        actionForm.empty();
+        actionForm.append(page);
+        actionForm.append(type);
+        actionForm.append(keyword);
+
+        actionForm
+              .attr("action","/board/list")
+              .attr("method","get")
+              .submit();
+    });
+
+  </script>
+
+</th:block>
+
+</body>
+</th:block>
+</html>
