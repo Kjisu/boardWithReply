@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.zerock.boardWithReply.entity.Board;
 import org.zerock.boardWithReply.entity.Reply;
 
+import java.util.List;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -37,5 +38,34 @@ public class ReplyRepositoryTests {
                     //쿼리실행
                     repository.save(reply);
                 });
+    }
+
+
+    //특정 게시물의 댓글들 가져오는 메서드 테스트
+    @Test
+    public void getRepliesByBoardOrderByBno(){
+
+        List<Reply> result = repository.getReplyList(202L);
+
+        result.forEach(s-> System.out.println(">>>>>"+s));
+    }
+
+    @Test
+    public void test(){
+
+        //게시글 301번에 댓글 5개 넣기
+        IntStream.rangeClosed(2,6).forEach(i->{
+
+            Board board = Board.builder().bno(301L).build();
+
+            Reply reply = Reply.builder()
+                    .text("ㄷㄷㄷㄷㄷ")
+                    .replyer("user100")
+                    .board(board)
+                    .build();
+
+            repository.save(reply);
+
+        });
     }
 }

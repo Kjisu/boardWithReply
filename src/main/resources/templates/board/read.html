@@ -50,6 +50,248 @@
     <!--목록으로 버튼-->
   </form>
 
+  <!--모달창 양식 시작 -->
+  <div class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <!--헤더 시작 : 모달 제목, 버튼(?)-->
+        <div class="modal-header">
+          <h5 class="modal-title"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <!--바디 시작 : 댓글내용,작성자,댓글번호(hidden) -->
+        <div class="modal-body">
+          <div class="form-group">
+            <input class="form-control" type="text" name="text" >
+          </div>
+          <div class="form-group">
+            <input class="form-control" type="text" name="replyer" >
+            <input type="hidden" name="rno">
+          </div>
+        </div>
+        <!--풋터 시작 : 버튼들..삭제,수정,저장,취소-->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger replyRemove">삭제</button>
+          <button type="button" class="btn btn-warning replyModify">수정</button>
+          <button type="button" class="btn btn-primary replySave">저장</button>
+          <button type="button" class="btn btn-outline-secondary replyClose" data-dismiss="modal">닫기</button>
+        </div>
+        <!--풋터 끝-->
+      </div>
+    </div>
+  </div>
+  <!--모달창 양식 끝 -->
+
+  <div>
+    <!--댓글 갯수 보여주는 부분 시작-->
+    <div class="mt-4">
+      <h5>
+        <span class="badge badge-secondary replyCount">댓글갯수 [[${dto.replyCount}]]</span>
+        <span class="badge badge-secondary addReply">댓글등록 </span>
+      </h5>
+    </div>
+    <!--댓글 갯수 보여주는 부분 끝-->
+    <!--댓글 목록 시작-->
+    <div class="list-group replyList">
+
+    </div>
+    <!--댓글 목록 끝-->
+
+  </div>
+
+  <script th:inline="javascript">
+
+    $(document).ready(function(){
+
+        //게시글 번호
+          var bno = [[${dto.bno}]];
+
+        //댓글 달릴 영역
+          var replyGroup = $(".replyList");
+
+        //버튼 클릭 시 댓글 리스트 보여주기
+          $(".replyCount").click(function(){
+
+              loadJSONData();
+
+          });//end click()
+
+        //댓글 데이터 가져오는 함수 loadJSONDate()
+        function loadJSONData(){
+
+            $.getJSON('/reply/board/'+bno,function(arr){
+
+                console.log(arr);
+
+                var str = "";
+
+                //댓글 갯수 변경
+                  $('.replyCount').html("댓글 갯수 : "+arr.length);
+
+                //댓글 목록 만들기
+                  $.each(arr,function(idx,reply){
+
+                      console.log(reply);
+
+                      str += '<div class="card-body" data-rno="'+reply.rno+'"><b>'+reply.rno +'</b>';
+                      str += '<h5 class="card-title">'+reply.text+'</h5>';
+                      str += '<h6 class="card-subtitle mb-2 text-muted">'+reply.replyer+'</h6>';
+                      str += '</div>'
+
+                  });//end each()
+
+                //댓글 목록 자리에 붙이기
+                replyGroup.html(str);
+
+            })
+        }//end loadJSONData()
+
+
+
+
+    ///////////////////////////////////////////////////////댓글 등록 버튼 클릭 시, 모달창 보여주기
+      //모달창
+      var modal = $('.modal');
+
+      $(".addReply").click(function(){
+
+          modal.modal('show');
+
+          //댓글 입력하는 부분 초기화
+          $('input[name="text"]').val('');
+          $('input[name="replyer"]').val('');
+
+          //모달 내 모든 버튼 안 보이도록
+          $(".modal-footer .btn").hide();
+          $(".replySave, .replyClose").show();
+
+      });//end click()
+
+
+    ////////////////////////////////////////////////////////// 댓글 저장하기 버튼 클릭 시,
+    $(".replySave").click(function(){
+
+        //내용,작성자,게시글번호 가져와서 js객체 생성
+        var reply = {
+            bno : bno,
+            text : $('input[name="text"]').val(),
+            replyer : $('input[name="replyer"]').val()
+        }
+        console.log("새로 등록될 댓글 내용 : "+reply);
+
+        //ajax이용하여 데이터 디비로 보내기
+        $.ajax({
+            url: '/reply/register',
+            method: 'post',
+            data: JSON.stringify(reply),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function(data){
+
+                console.log("저장 성공 !! "+ data);
+
+                var newRno = parseInt(data);
+                alert("댓글이 등록되었습니다");
+
+                //모달창끄기
+                modal.modal('hide');
+                loadJSONData();//변경된 댓글 갯수를 화면에 반영하기 위함
+
+            }//success:function()
+
+        })//end ajax()
+
+    });//end click()
+
+
+    ////////////////////////////////////////////////////////// 댓글 목록에서 특정 댓글 클릭했을 때, 모달창에 댓글 정보 출력하기
+
+    $(".replyList").on("click",".card-body",function(){
+
+        //클릭된 댓글 번호 가져오기
+        var rno = $(this).data("rno");////div태그에 적은 data-rno 속성의 값을 가져온다
+
+        //모달창 양식에 데이터 붙이기
+        $("input[name='text']").val($(this).find('.card-title').html());
+        $("input[name='replyer']").val($(this).find('.card-subtitle').html());
+        $("input[name='rno']").val(rno);
+
+        //불필요한 버튼 없애고
+        $(".modal-footer .btn").hide();
+        $(".replyRemove, .replyModify, .replyClose").show();
+
+        modal.modal('show');
+
+
+    });//end on()
+
+
+  ////////////////////////////////////////////////////////// 삭제 버튼 클릭시, ajax로 댓글 번호 보내기 (반드시 delete방식으로 ajax를 이용하여 서버 호출해야 함)
+
+  $(".replyRemove").on("click",function(){
+
+      //삭제할 댓글의 번호, 모달창에서 가져오기
+      var rno = $("input[name='rno']").val();
+
+      //ajax로 데이터 전송
+      $.ajax({
+          url: '/reply/remove/'+rno,
+          method: 'delete',
+          success: function(result){
+
+              console.log("댓글 삭제 "+ result);
+
+              if(result === 'success'){
+                  alert("댓글이 삭제되었습니다.");
+                  modal.modal('hide');
+                  loadJSONData();
+              }
+          }
+      })//end ajax()
+  });//end on()
+
+  ////////////////////////////////////////////////////////// 수정 버튼 클릭시, ajax로 댓글 번호 보내기 (반드시 delete방식으로 ajax를 이용하여 서버 호출해야 함)
+
+  $(".replyModify").click(function(){
+
+      //수정할 댓글번호 가져오기(모달창에서)
+      var rno = $("input[name='rno']").val();
+
+      //js객체 만들기 -> js객체를 json타입으로 변환 -> 전송
+      var reply = {
+          rno : rno,
+          bno : bno,
+          text : $("input[name='text']").val(),
+          replyer: $("input[name='replyer']").val()
+      }
+
+      //put메서드 방식으로 전송
+      $.ajax({
+          url : '/reply/modify/'+rno,
+          method: 'put',
+          data: JSON.stringify(reply),
+          contentType: 'application/json; charset=utf-8',
+          success: function(result){
+
+              console.log("댓글 수정 "+result);
+
+              alert("댓글이 수정되었습니다.");
+              modal.modal('hide');
+              loadJSONData();
+          }
+
+       });//end ajax()
+
+      });//end click()
+
+    });//end ready()
+
+
+
+  </script>
+
 
 </th:block>
 
