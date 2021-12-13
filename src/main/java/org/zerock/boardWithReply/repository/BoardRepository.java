@@ -5,15 +5,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.zerock.boardWithReply.entity.Board;
+import org.zerock.boardWithReply.repository.search.SearchBoardRepository;
 
 import java.util.List;
 
-public interface BoardRepository extends JpaRepository<Board,Long> {
+public interface BoardRepository extends JpaRepository<Board,Long>, SearchBoardRepository {
 
     //특정 게시글 조회(댓글 X)
     //Board 엔티티 + Member 엔티티 둘 다 select하는 쿼리 (Board 입장에서 연관관계 있는 경우)
     //근데 이걸 굳이 메서드로 만들 필요가 있을까? 어짜피 @Transactional 과 findById()로 처리할 수 있을 것 같은데
-   @Query("select b, w from Board b left join b.writer w where b.bno = :bno ")
+   @Query("select b, w from Board b left join b.writer w where                                                                                                                                                                     b.bno = :bno ")
     Object getBoardWithWriter(Long bno);
 
 

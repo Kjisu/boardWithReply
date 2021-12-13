@@ -110,6 +110,20 @@ public class BoardRepositoryTests {
         System.out.println(Arrays.toString(arr));
     }
 
+    @Test
+    public void 서치리파지토리작동확인(){
+
+        repository.search1();
+
+    }
+
+    @Test
+    public void 테스트searchPage메서드(){
+
+        Pageable pageable = PageRequest.of(0,10,Sort.by("bno").descending());
+        Page<Object[]> result = repository.searchPage("t", "1", pageable);
+    }
+
 
 
 

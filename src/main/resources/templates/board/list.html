@@ -57,8 +57,29 @@
   </span>
   <!--등록 버튼 끝-->
 
-  <!--검색form 시작-->
-  <!--검색form 끝-->
+  <!--검색 form 시작-->
+  <form action="/board/list" method="get" id="searchForm">
+    <div class="input-group">
+      <!--시작 페이지 번호 1로 지정 , 새롭게 검색을 하는 거니까 -->
+      <input type="hidden" name="page" value="1">
+      <div class="input-group-prepend">
+        <select class="custom-select" name="type">
+          <option th:selected="${pageRequestDTO.type == null}">---------</option>
+          <option value="t" th:selected="${pageRequestDTO.type == 't'}" >제목</option>
+          <option value="c" th:selected="${pageRequestDTO.type == 'c'}">내용</option>
+          <option value="w" th:selected="${pageRequestDTO.type == 'w'}">작성자</option>
+          <option value="tc" th:selected="${pageRequestDTO.type == 'tc'}">제목+내용</option>
+          <option value="tcw" th:selected="${pageRequestDTO.type == 'tcw'}">제목+내용+작성자</option>
+        </select>
+      </div>
+      <input type="text" name="keyword" th:value="${pageRequestDTO.keyword}" class="form-control">
+      <div class="input-group-append" id="button-addon4">
+        <button type="button" class="btn btn-outline-secondary btn-search">검색</button>
+        <button type="button" class="btn btn-outline-secondary btn-clear">삭제</button>
+      </div>
+    </div>
+  </form>
+  <!--검색 form 끝-->
 
 
   <!--JS-->
@@ -74,6 +95,25 @@
       if(msg !== null){
         alert("삭제되었습니다.");
       }
+
+      //검색 버튼
+      var searchForm = $("#searchForm");
+
+      $(".btn-search").click(function(){
+
+        searchForm.submit();
+      });
+
+      //키워드 삭제 버튼
+      $(".btn-clear").click(function(){
+
+        searchForm
+            .empty()
+            .submit();
+
+      });
+
+
     });
 
   </script>

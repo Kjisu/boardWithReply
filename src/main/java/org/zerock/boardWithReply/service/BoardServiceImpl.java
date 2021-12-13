@@ -47,7 +47,8 @@ public class BoardServiceImpl implements BoardService{
         log.info(">>>>>>>> [S] getList()...");
 
         //쿼리실행
-        Page<Object[]> result = repository.getBoardWithReplyCount(dto.getPageable(Sort.by("bno").descending()));
+        //Page<Object[]> result = repository.getBoardWithReplyCount(dto.getPageable(Sort.by("bno").descending()));
+        Page<Object[]> result = repository.searchPage(dto.getType(), dto.getKeyword(), dto.getPageable(Sort.by("bno").descending()));
 
         //entity->dto로 변환하는 기능 Function인터페이스에 담기
         Function<Object[],BoardDTO> fn = (en -> entityToDTO((Board) en[0],(Member) en[1],(Long) en[2]));
